@@ -2,6 +2,14 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+/* Assignment 1: Pong
+ * Mandatory parts of the assignment
+ * 1. Moving paddles
+ * 2. A moving and bouncing ball
+ * 3. Storing and showing the number of lives
+ * 4. Game states
+ */
+
 namespace Pong
 {
     public class Game1 : Game
