@@ -18,10 +18,10 @@ using Microsoft.Xna.Framework.Input;
 *      
 * 2. A moving and bouncing ball
 *      -  The next step is to add a moving ball. Start by drawing the ball sprite in the center of the screen. Write code that 
-*          moves the ball in a certain direction, for example diagonally to the right and down. Next, instead of a fixed direction,
-*          write code that gives the ball a random movement direction, using the System.Random class. Make sure that the 
-*          direction (so: the angle) is random, but that the speed is always the same. You could choose between a few pre-
-*          defined directions, or calculate a truly random direction.
+*          moves the ball in a certain direction, for example diagonally to the right and down. 
+*          Next, instead of a fixed direction, write code that gives the ball a random movement direction, 
+*          using the System.Random class. Make sure that the direction (so: the angle) is random, but that the speed is 
+*          always the same. You could choose between a few pre-defined directions, or calculate a truly random direction.
 *     -   Next up, make sure that the ball can bounce off the top and bottom edges of the screen. When the ball sprite 
 *          reaches one of those edges, its vertical speed should flip.
 *     -   After that, add code to detect if the ball has reached the left or right edge of the screen. If that happens, check 
@@ -32,6 +32,7 @@ using Microsoft.Xna.Framework.Input;
 *          it hits the paddle in the middle. This allows players to apply some strategy, to make the game harder for their opponent.
 *    -    If the ball reaches the left/right side of the screen and does not touch a paddle, then the ball should re-appear in the 
 *          center of the screen. It should start moving in a new random direction, at its relaxed starting speed.
+*          
 * 3. Storing and showing the number of lives
 * 
 *    -    Add code so that both players start with 3 lives. Whenever a player fails to bounce the ball back, that player should lose 
