@@ -1,8 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
-
+using System.Linq.Expressions;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
 
 // ****************             Assignment 1: Pong             **************** \\
 /*
@@ -53,13 +53,38 @@ using Microsoft.Xna.Framework.Input;
 *          should now be able to start a new game by pressing the spacebar.
 */
 
+
 namespace Pong
 {
     public class Game1 : Game
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        Color background;
+        Texture2D ballTexture;
+        Texture2D Left_Paddle_Texture;
+        Texture2D Right_Paddle_Texture;
+        Vector2 position_Left;
+        Vector2 position_Right;
+        Vector2 position_Ball;
 
+        int xPos2_Left = 0;
+        int yPos2_Left = 0;
+
+        int xPos2_Right = 0;
+        int yPos2_Right = 0;
+
+        int xPos_Ball = 400;
+        int yPos_Ball = 250;
+        int x_Change = 4;
+        int y_Change = 3;
+
+        // waarde dat bijhoudt hoeveel de bal versneld of vertraagd per hit.
+        // 1 = geen change, 
+        // <1 = vertraging
+        // >1 = versnelling
+        int speed_modifier = 2;
+    
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -79,23 +104,188 @@ namespace Pong
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+            ballTexture = Content.Load<Texture2D>("bal");
+            Left_Paddle_Texture = Content.Load<Texture2D>("blauweSpeler");
+            Right_Paddle_Texture = Content.Load<Texture2D>("rodeSpeler");
         }
 
         protected override void Update(GameTime gameTime)
         {
+            // stopt de game
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
 
+            // TODO: Add your update logic here
+            //int redComponent = gameTime.TotalGameTime.Milliseconds / 4;
+            //background = new Color(redComponent, 0, redComponent);
+
+            //position = Vector2.Zero; // geeft starting position linksbovenin het scherm
+            // x = 600 breed
+            // y = 480 = bottom of screen
+            // int xPos = 0 + gameTime.TotalGameTime.Milliseconds;
+            //xPos2 += 2;
+
+            // Als de S-key ingedrukt is dan wordt de yPos2 met 4 verhoogd (dus gaat de pad naar beneden) Als de W-key wordt ingedrukt dan juist andersom.
+            if (Keyboard.GetState().IsKeyDown(Keys.S))
+                // Als ook de leftshift wordt gebruikt met S of W dan gaat de pad sneller naar boven of beneden (een speed boost)
+                if (Keyboard.GetState().IsKeyDown(Keys.LeftShift))
+                    yPos2_Left += 10;
+                else yPos2_Left += 5;
+            // Herhaling van regels 83 tot 87 alleen dan gaat de pad de andere richting op.
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
+                if (Keyboard.GetState().IsKeyDown(Keys.LeftShift))
+                    yPos2_Left -= 10;
+                else yPos2_Left -= 5;
+
+            //Buttons voor rode speler Up arrow en Down arrow en Right arrow voor Boost
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Down))
+                if (Keyboard.GetState().IsKeyDown(Keys.Right))
+                    yPos2_Right += 10;
+                else yPos2_Right += 5;
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Up))
+                if (Keyboard.GetState().IsKeyDown(Keys.Right))
+                    yPos2_Right -= 10;
+                else yPos2_Right -= 5;
+
+            //bepaal de boundaries van de game map zodat de Pad niet van het scherm af gaat
+            // boven = 0 
+            // onderin = 470
+            //(470 - sprite lengte = positie lengte van de sprite)
+
+            //          ##################################################
+            //          ||                                              ||
+            //          ||                                              ||
+            //          ||                                              ||
+            //          ||   ##                 X                  ##   ||      
+            //          ||   ##                XXX                 ##   ||
+            //          ||   ##                 X                  ##   ||
+            //          ||   ##                                    ##   ||
+            //          ||                                              ||
+            //          ||                                              ||
+            //          ||                                              ||
+            //          ##################################################
+            //
+            //      paddle grootte: width 25px
+            //                      height 80px
+            //
+
+
+
+            // Blauwe speler
+            if (yPos2_Left >= 390)
+            {
+                yPos2_Left = 390;
+            }
+            if (yPos2_Left <= 0)
+            {
+                yPos2_Left = 0;
+            }
+            //Rechts (rode speler)
+            if (yPos2_Right >= 390)
+            {
+                yPos2_Right = 390;
+            }
+            if (yPos2_Right <= 0)
+            {
+                yPos2_Right = 0;
+            }
+
+            int xPos_Left = 100;
+            int xPos_Right = 675;
+            position_Left = new Vector2(xPos_Left, yPos2_Left);
+            position_Right = new Vector2(xPos_Right, yPos2_Right);
+
+            
+
+            // ball bounced terug rechts van het scherm
+            if (xPos_Ball>=800-18)
+            {
+                if (x_Change >= 0)
+                {
+                    x_Change = x_Change * -1;
+                }
+            }
+            // ball bounced terug links van het scherm
+            if (xPos_Ball <= 0)
+            {
+                if (x_Change <= 0)
+                {
+                    x_Change = x_Change * -1;
+                }
+            }
+
+            // boven
+            if (yPos_Ball >= 468)
+            {
+                if (y_Change >= 0)
+                {
+                    y_Change = y_Change * -1;
+                }
+            }
+            // onder
+            if (yPos_Ball <= 0)
+            {
+                if (y_Change <= 0)
+                {
+                    y_Change = y_Change * -1;
+                }
+            }
+
+
+            //check of de bal de linker speler raakt
+            if (xPos_Ball <= xPos_Left+18 && yPos_Ball>=yPos2_Left  && yPos_Ball<=yPos2_Left+80)
+            {
+                if (x_Change <= 0)
+                {
+                    x_Change = x_Change * -1 * speed_modifier;
+                }
+            }
+            //check of de bal de rechter speler raakt
+            if (xPos_Ball >= xPos_Right-18 && yPos_Ball>=yPos2_Right && yPos_Ball<=yPos2_Right+80)
+            {
+                if (x_Change >= 0)
+                {
+                    x_Change = x_Change * -1 * speed_modifier;
+                }
+            }
+
+            if (x_Change >= 16)
+            {
+                speed_modifier = 1;
+            }
+
+            xPos_Ball = xPos_Ball + x_Change;
+            yPos_Ball = yPos_Ball + y_Change;
+            
+
+            position_Ball = new Vector2(xPos_Ball, yPos_Ball);
+            
             base.Update(gameTime);
+
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            GraphicsDevice.Clear(Color.Beige);
+
+
+            _spriteBatch.Begin();
+
+            
+
+            _spriteBatch.Draw(Left_Paddle_Texture, position_Left, Color.White); // blauwe speler 
+
+            _spriteBatch.Draw(Right_Paddle_Texture, position_Right, Color.White); // rode speler
+
+            _spriteBatch.Draw(ballTexture, position_Ball, Color.White); // de bal
+
+
+            _spriteBatch.End();
+
 
             base.Draw(gameTime);
         }
