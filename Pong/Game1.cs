@@ -68,14 +68,17 @@ namespace Pong
         Vector2 position_Right;
         Vector2 position_Ball;
 
-        int xPos2_Left = 0;
-        int yPos2_Left = 0;
+ 
+        int yPos_Left = 0;
 
-        int xPos2_Right = 0;
-        int yPos2_Right = 0;
+        int xPos_Left = 100;
+        int xPos_Right = 675;
+
+        int yPos_Right = 0;
 
         int xPos_Ball = 400;
         int yPos_Ball = 250;
+
         int x_Change = 4;
         int y_Change = 3;
 
@@ -130,25 +133,25 @@ namespace Pong
             if (Keyboard.GetState().IsKeyDown(Keys.S))
                 // Als ook de leftshift wordt gebruikt met S of W dan gaat de pad sneller naar boven of beneden (een speed boost)
                 if (Keyboard.GetState().IsKeyDown(Keys.LeftShift))
-                    yPos2_Left += 10;
-                else yPos2_Left += 5;
+                    yPos_Left += 10;
+                else yPos_Left += 5;
             // Herhaling van regels 83 tot 87 alleen dan gaat de pad de andere richting op.
             if (Keyboard.GetState().IsKeyDown(Keys.W))
                 if (Keyboard.GetState().IsKeyDown(Keys.LeftShift))
-                    yPos2_Left -= 10;
-                else yPos2_Left -= 5;
+                    yPos_Left -= 10;
+                else yPos_Left -= 5;
 
             //Buttons voor rode speler Up arrow en Down arrow en Right arrow voor Boost
 
             if (Keyboard.GetState().IsKeyDown(Keys.Down))
                 if (Keyboard.GetState().IsKeyDown(Keys.Right))
-                    yPos2_Right += 10;
-                else yPos2_Right += 5;
+                    yPos_Right += 10;
+                else yPos_Right += 5;
 
             if (Keyboard.GetState().IsKeyDown(Keys.Up))
                 if (Keyboard.GetState().IsKeyDown(Keys.Right))
-                    yPos2_Right -= 10;
-                else yPos2_Right -= 5;
+                    yPos_Right -= 10;
+                else yPos_Right -= 5;
 
             //bepaal de boundaries van de game map zodat de Pad niet van het scherm af gaat
             // boven = 0 
@@ -168,39 +171,40 @@ namespace Pong
             //          ||                                              ||
             //          ##################################################
             //
-            //      paddle grootte: width 25px
+            //      paddle grootte: width 18px
             //                      height 80px
             //
 
 
 
             // Blauwe speler
-            if (yPos2_Left >= 390)
+            if (yPos_Left >= 390)
             {
-                yPos2_Left = 390;
+                yPos_Left = 390;
             }
-            if (yPos2_Left <= 0)
+            if (yPos_Left <= 0)
             {
-                yPos2_Left = 0;
+                yPos_Left = 0;
             }
             //Rechts (rode speler)
-            if (yPos2_Right >= 390)
+            if (yPos_Right >= 390)
             {
-                yPos2_Right = 390;
+                yPos_Right = 390;
             }
-            if (yPos2_Right <= 0)
+            if (yPos_Right <= 0)
             {
-                yPos2_Right = 0;
+                yPos_Right = 0;
             }
 
-            int xPos_Left = 100;
-            int xPos_Right = 675;
-            position_Left = new Vector2(xPos_Left, yPos2_Left);
-            position_Right = new Vector2(xPos_Right, yPos2_Right);
+
+            position_Left = new Vector2(xPos_Left, yPos_Left);
+            position_Right = new Vector2(xPos_Right, yPos_Right);
 
             
 
             // ball bounced terug rechts van het scherm
+            // ball sprite width = 18px
+            // ball sprite height = 18px
             if (xPos_Ball>=800-18)
             {
                 if (x_Change >= 0)
@@ -236,7 +240,7 @@ namespace Pong
 
 
             //check of de bal de linker speler raakt
-            if (xPos_Ball <= xPos_Left+18 && yPos_Ball>=yPos2_Left  && yPos_Ball<=yPos2_Left+80)
+            if (xPos_Ball <= xPos_Left+18 && yPos_Ball>=yPos_Left  && yPos_Ball<=yPos_Left+80)
             {
                 if (x_Change <= 0)
                 {
@@ -244,7 +248,7 @@ namespace Pong
                 }
             }
             //check of de bal de rechter speler raakt
-            if (xPos_Ball >= xPos_Right-18 && yPos_Ball>=yPos2_Right && yPos_Ball<=yPos2_Right+80)
+            if (xPos_Ball >= xPos_Right-18 && yPos_Ball>=yPos_Right && yPos_Ball<=yPos_Right+80)
             {
                 if (x_Change >= 0)
                 {
