@@ -1,8 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
-
+using SharpDX.Direct3D9;
 
 // ****************             Assignment 1: Pong             **************** \\
 /*
@@ -34,7 +33,6 @@ using Microsoft.Xna.Framework.Input;
 *          center of the screen. It should start moving in a new random direction, at its relaxed starting speed.
 *          
 * 3. Storing and showing the number of lives
-* 
 *    -    Add code so that both players start with 3 lives. Whenever a player fails to bounce the ball back, that player should lose 
 *          a life.
 *    -    Make sure that the number of lives for both players is drawn on the screen. You can do this by drawing sprites in the top-
@@ -60,16 +58,33 @@ namespace Pong
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        // Ball variables
+        Texture2D pongBall;
+        Vector2 ballPosition;
+        float ballVelocity; // or double? maybe don't need that much accuracy?
+
+        // Positional variables
+        int windowWidth;
+        int windowHeight;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            windowWidth = _graphics.PreferredBackBufferWidth;
+            windowHeight = _graphics.PreferredBackBufferHeight;
         }
 
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+
+            // Place ball in center of the screen (relative to topleft corner of the .png!)
+            ballPosition = new Vector2(windowWidth / 2, windowHeight / 2);
+
+            // Set speed
+            ballVelocity = 150f; 
 
             base.Initialize();
         }
@@ -79,6 +94,7 @@ namespace Pong
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+            pongBall = Content.Load<Texture2D>("pongBall");
         }
 
         protected override void Update(GameTime gameTime)
@@ -88,6 +104,29 @@ namespace Pong
 
             // TODO: Add your update logic here
 
+            // ball moves with speed 150 toward topleft corner
+            ballPosition.Y -= ballVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            ballPosition.X -= ballVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // ball can't 'fall off the screen'
+            if (ballPosition.X > _graphics.PreferredBackBufferWidth - pongBall.Width / 2)
+            {
+                ballPosition.X = _graphics.PreferredBackBufferWidth - pongBall.Width / 2;
+            }
+            else if (ballPosition.X < pongBall.Width / 2)
+            {
+                ballPosition.X = pongBall.Width / 2;
+            }
+
+            if (ballPosition.Y > _graphics.PreferredBackBufferHeight - pongBall.Height / 2)
+            {
+                ballPosition.Y = _graphics.PreferredBackBufferHeight - pongBall.Height / 2;
+            }
+            else if (ballPosition.Y < pongBall.Height / 2)
+            {
+                ballPosition.Y = pongBall.Height / 2;
+            }
+
             base.Update(gameTime);
         }
 
@@ -96,6 +135,11 @@ namespace Pong
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+            _spriteBatch.Begin();
+
+            _spriteBatch.Draw(pongBall, ballPosition, Color.White);
+            
+            _spriteBatch.End();
 
             base.Draw(gameTime);
         }
