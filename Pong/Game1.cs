@@ -60,26 +60,22 @@ namespace Pong
         private SpriteBatch _spriteBatch;
 
         // Sprite variables
-        Texture2D pongBall;
+        Texture2D ballSprite;
         Vector2 ballPosition;
-        float ballVelocity; // or double? but maybe don't need that much accuracy...
-        int ballWidth;
-        int ballHeight;
+        float ballVelocity, ballDirection; // or double? --> Draw wants float
+        int ballWidth, ballHeight;
 
         Texture2D leftPaddle;
         Vector2 leftPaddlePosition;
         float leftPaddleVelocity;
-        int leftPaddleWidth;
-        int leftPaddleHeight;
+        int leftPaddleWidth, leftPaddleHeight;
 
         Texture2D rightPaddle;
         Vector2 rightPaddlePosition;
         float rightPaddleVelocity;
-        int rightPaddleWidth;
-        int rightPaddleHeight;
+        int rightPaddleWidth, rightPaddleHeight;
 
-        int windowWidth;
-        int windowHeight;
+        int windowWidth, windowHeight;
 
 
         public Game1()
@@ -115,20 +111,20 @@ namespace Pong
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // Game sprites
-            pongBall = Content.Load<Texture2D>("pongBall");
-            ballHeight = pongBall.Height;
-            ballWidth = pongBall.Width;
+            ballSprite = Content.Load<Texture2D>("pongBall");
+            ballHeight = ballSprite.Height;
+            ballWidth = ballSprite.Width;
             leftPaddle = Content.Load<Texture2D>("blauweSpeler");
             leftPaddleHeight = leftPaddle.Height;
             leftPaddleWidth = leftPaddle.Width;
             rightPaddle = Content.Load<Texture2D>("rodeSpeler");
             rightPaddleHeight = rightPaddle.Height;
             rightPaddleWidth = rightPaddle.Width;
-            Console.WriteLine("content");
         }
 
         protected override void Update(GameTime gameTime)
         {
+            // key functionality
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
                 Exit();
@@ -161,12 +157,13 @@ namespace Pong
 
         protected override void Draw(GameTime gameTime)
         {
+            // background color
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            // sprites
             _spriteBatch.Begin();
 
-            _spriteBatch.Draw(pongBall, ballPosition, Color.CornflowerBlue);
+            _spriteBatch.Draw(ballSprite, ballPosition, Color.CornflowerBlue);
             _spriteBatch.Draw(leftPaddle, leftPaddlePosition, Color.CornflowerBlue);
             _spriteBatch.Draw(rightPaddle, rightPaddlePosition, Color.CornflowerBlue);
 
