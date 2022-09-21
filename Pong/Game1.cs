@@ -61,15 +61,23 @@ namespace Pong
         // Sprite variables
         Texture2D pongBall;
         Vector2 ballPosition;
-        float ballVelocity; // or double? maybe don't need that much accuracy?
+        float ballVelocity; // or double? but maybe don't need that much accuracy...
+
         Texture2D leftPaddle;
+        Vector2 leftPaddlePosition;
         Texture2D rightPaddle;
+        Vector2 rightPaddlePosition;
 
         // Positional variables
         int windowWidth;
         int windowHeight;
         int ballWidth;
         int ballHeight;
+
+        int leftPaddleWidth;
+        int leftPaddleHeight;
+        int rightPaddleWidth;
+        int rightPaddleHeight;
 
         public Game1()
         {
@@ -83,8 +91,12 @@ namespace Pong
         protected override void Initialize()
         {
             // Place ball in center of the screen (from center of the ball)
-            ballPosition = new Vector2(windowWidth / 2,
-                                       windowHeight / 2);
+            ballPosition = new Vector2(windowWidth/2 - ballWidth/2,
+                                       windowHeight/2 - ballHeight/2);
+            leftPaddlePosition  = new Vector2(0, windowHeight/2 - leftPaddleHeight);
+
+            rightPaddlePosition = new Vector2(windowWidth - rightPaddleWidth, 
+                                              windowHeight/2 - rightPaddleHeight/2);
 
             // Set speed
             ballVelocity = 150f;
@@ -101,36 +113,40 @@ namespace Pong
             ballHeight = pongBall.Height;
             ballWidth = pongBall.Width;
             leftPaddle = Content.Load<Texture2D>("blauweSpeler");
+            leftPaddleHeight = leftPaddle.Height;
+            leftPaddleWidth = leftPaddle.Width;
             rightPaddle = Content.Load<Texture2D>("rodeSpeler");
-
+            rightPaddleHeight = rightPaddle.Height;
+            rightPaddleWidth = rightPaddle.Width;
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            {
                 Exit();
+            }
 
             // ball moves with speed 150 toward topleft corner
-            ballPosition.Y -= ballVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            ballPosition.X -= ballVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            // ball can't 'fall off the screen'
-            if (ballPosition.X > _graphics.PreferredBackBufferWidth - ballWidth / 2)
+            ballPosition.X += ballVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            ballPosition.Y += ballVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            
+            // ball can't "fall off the screen"
+            if (ballPosition.X > windowWidth - ballWidth) // right
             {
-                ballPosition.X = _graphics.PreferredBackBufferWidth - ballWidth / 2;
+                ballPosition.X = windowWidth - ballWidth;
             }
-            else if (ballPosition.X < ballWidth / 2)
+            else if (ballPosition.X < 0) // left
             {
-                ballPosition.X = ballWidth / 2;
+                ballPosition.X = 0;
             }
-
-            if (ballPosition.Y > _graphics.PreferredBackBufferHeight - ballHeight / 2)
+            if (ballPosition.Y > windowHeight - ballHeight) // bottom
             {
-                ballPosition.Y = _graphics.PreferredBackBufferHeight - ballHeight / 2;
+                ballPosition.Y = windowHeight - ballHeight;
             }
-            else if (ballPosition.Y < ballHeight / 2)
+            else if (ballPosition.Y < 0) // top
             {
-                ballPosition.Y = ballHeight / 2;
+                ballPosition.Y = 0;
             }
 
             base.Update(gameTime);
@@ -138,12 +154,15 @@ namespace Pong
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.White);
+            GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
 
-            _spriteBatch.Draw(pongBall, ballPosition, Color.White);
+            _spriteBatch.Draw(pongBall, ballPosition, Color.CornflowerBlue);
+            _spriteBatch.Draw(leftPaddle, leftPaddlePosition, Color.CornflowerBlue);
+            _spriteBatch.Draw(rightPaddle, rightPaddlePosition, Color.CornflowerBlue);
+
 
             _spriteBatch.End();
 
