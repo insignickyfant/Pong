@@ -65,18 +65,13 @@ namespace Pong
         float ballVelocity, ballDirection; // or double? --> Draw wants float
         int ballWidth, ballHeight;
 
-        Texture2D leftPaddle;
-        Vector2 leftPaddlePosition;
-        float leftPaddleVelocity;
-        int leftPaddleWidth, leftPaddleHeight;
+        Texture2D leftPaddle, rightPaddle;
+        Vector2 leftPaddlePosition, rightPaddlePosition;
+        float leftPaddleVelocity, rightPaddleVelocity;
+        int leftPaddleWidth, leftPaddleHeight, rightPaddleWidth, rightPaddleHeight;
 
-        Texture2D rightPaddle;
-        Vector2 rightPaddlePosition;
-        float rightPaddleVelocity;
-        int rightPaddleWidth, rightPaddleHeight;
-
+        // Window size variables
         int windowWidth, windowHeight;
-
 
         public Game1()
         {
