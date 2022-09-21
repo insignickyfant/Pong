@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SharpDX.Direct3D9;
+using System;
 
 // ****************             Assignment 1: Pong             **************** \\
 /*
@@ -62,22 +63,24 @@ namespace Pong
         Texture2D pongBall;
         Vector2 ballPosition;
         float ballVelocity; // or double? but maybe don't need that much accuracy...
-
-        Texture2D leftPaddle;
-        Vector2 leftPaddlePosition;
-        Texture2D rightPaddle;
-        Vector2 rightPaddlePosition;
-
-        // Positional variables
-        int windowWidth;
-        int windowHeight;
         int ballWidth;
         int ballHeight;
 
+        Texture2D leftPaddle;
+        Vector2 leftPaddlePosition;
+        float leftPaddleVelocity;
         int leftPaddleWidth;
         int leftPaddleHeight;
+
+        Texture2D rightPaddle;
+        Vector2 rightPaddlePosition;
+        float rightPaddleVelocity;
         int rightPaddleWidth;
         int rightPaddleHeight;
+
+        int windowWidth;
+        int windowHeight;
+
 
         public Game1()
         {
@@ -90,18 +93,21 @@ namespace Pong
 
         protected override void Initialize()
         {
+            base.Initialize(); 
+
             // Place ball in center of the screen (from center of the ball)
             ballPosition = new Vector2(windowWidth/2 - ballWidth/2,
                                        windowHeight/2 - ballHeight/2);
-            leftPaddlePosition  = new Vector2(0, windowHeight/2 - leftPaddleHeight);
 
+            // Place paddles centered in left and right edges
+            leftPaddlePosition = new Vector2(0, windowHeight/2 - leftPaddleHeight/2);
             rightPaddlePosition = new Vector2(windowWidth - rightPaddleWidth, 
                                               windowHeight/2 - rightPaddleHeight/2);
 
-            // Set speed
+            // Set speeds
             ballVelocity = 150f;
-
-            base.Initialize();
+            leftPaddleVelocity = 100f;
+            rightPaddleVelocity = 100f;
         }
 
         protected override void LoadContent()
@@ -118,6 +124,7 @@ namespace Pong
             rightPaddle = Content.Load<Texture2D>("rodeSpeler");
             rightPaddleHeight = rightPaddle.Height;
             rightPaddleWidth = rightPaddle.Width;
+            Console.WriteLine("content");
         }
 
         protected override void Update(GameTime gameTime)
