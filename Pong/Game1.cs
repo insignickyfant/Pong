@@ -58,14 +58,18 @@ namespace Pong
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        // Ball variables
+        // Sprite variables
         Texture2D pongBall;
         Vector2 ballPosition;
         float ballVelocity; // or double? maybe don't need that much accuracy?
+        Texture2D leftPaddle;
+        Texture2D rightPaddle;
 
         // Positional variables
         int windowWidth;
         int windowHeight;
+        int ballWidth;
+        int ballHeight;
 
         public Game1()
         {
@@ -78,13 +82,12 @@ namespace Pong
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
-            // Place ball in center of the screen (relative to topleft corner of the .png!)
-            ballPosition = new Vector2(windowWidth / 2, windowHeight / 2);
+            // Place ball in center of the screen (from center of the ball)
+            ballPosition = new Vector2(windowWidth / 2,
+                                       windowHeight / 2);
 
             // Set speed
-            ballVelocity = 150f; 
+            ballVelocity = 150f;
 
             base.Initialize();
         }
@@ -93,8 +96,13 @@ namespace Pong
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            // Game sprites
             pongBall = Content.Load<Texture2D>("pongBall");
+            ballHeight = pongBall.Height;
+            ballWidth = pongBall.Width;
+            leftPaddle = Content.Load<Texture2D>("blauweSpeler");
+            rightPaddle = Content.Load<Texture2D>("rodeSpeler");
+
         }
 
         protected override void Update(GameTime gameTime)
@@ -102,29 +110,27 @@ namespace Pong
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
-
             // ball moves with speed 150 toward topleft corner
             ballPosition.Y -= ballVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
             ballPosition.X -= ballVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // ball can't 'fall off the screen'
-            if (ballPosition.X > _graphics.PreferredBackBufferWidth - pongBall.Width / 2)
+            if (ballPosition.X > _graphics.PreferredBackBufferWidth - ballWidth / 2)
             {
-                ballPosition.X = _graphics.PreferredBackBufferWidth - pongBall.Width / 2;
+                ballPosition.X = _graphics.PreferredBackBufferWidth - ballWidth / 2;
             }
-            else if (ballPosition.X < pongBall.Width / 2)
+            else if (ballPosition.X < ballWidth / 2)
             {
-                ballPosition.X = pongBall.Width / 2;
+                ballPosition.X = ballWidth / 2;
             }
 
-            if (ballPosition.Y > _graphics.PreferredBackBufferHeight - pongBall.Height / 2)
+            if (ballPosition.Y > _graphics.PreferredBackBufferHeight - ballHeight / 2)
             {
-                ballPosition.Y = _graphics.PreferredBackBufferHeight - pongBall.Height / 2;
+                ballPosition.Y = _graphics.PreferredBackBufferHeight - ballHeight / 2;
             }
-            else if (ballPosition.Y < pongBall.Height / 2)
+            else if (ballPosition.Y < ballHeight / 2)
             {
-                ballPosition.Y = pongBall.Height / 2;
+                ballPosition.Y = ballHeight / 2;
             }
 
             base.Update(gameTime);
@@ -132,13 +138,13 @@ namespace Pong
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.White);
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
 
             _spriteBatch.Draw(pongBall, ballPosition, Color.White);
-            
+
             _spriteBatch.End();
 
             base.Draw(gameTime);
