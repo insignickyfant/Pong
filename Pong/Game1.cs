@@ -170,7 +170,7 @@ namespace Pong
                 leftPaddlePosition.Y = 0;
             }
             // BOTTOM
-            else if(leftPaddlePosition.Y > windowHeight - paddleHeight) 
+            else if (leftPaddlePosition.Y > windowHeight - paddleHeight) 
             {
                 leftPaddlePosition.Y = windowHeight - paddleHeight;
             }
@@ -235,7 +235,7 @@ namespace Pong
                 }
             }
             // BOTTOM
-            else if(ballPosition.Y + ballHeight >= windowHeight) 
+            else if (ballPosition.Y + ballHeight >= windowHeight) 
             {
                 ballPosition.Y = windowHeight - ballHeight;
                 if (ballVelocity.Y >= 0)
