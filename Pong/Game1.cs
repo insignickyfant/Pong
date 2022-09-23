@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using SharpDX.Direct3D;
 using SharpDX.Direct3D9;
 using System;
 
@@ -24,7 +25,7 @@ using System;
 *      -  Next, instead of a fixed direction, write code that gives the ball a random movement direction, 
 *          using the System.Random class. Make sure that the direction (so: the angle) is random, but that the speed is 
 *          always the same. You could choose between a few pre-defined directions, or calculate a truly random direction.
-*          TODO
+*          DONE
 *          
 *     -   Next up, make sure that the ball can bounce off the top and bottom edges of the screen. When the ball sprite 
 *          reaches one of those edges, its vertical speed should flip. 
@@ -34,6 +35,7 @@ using System;
 *          whether or not the ball touches the paddle on that side of the screen. If the ball touches the paddle, the ball should 
 *          bounce off horizontally. When this happens, the speed of the ball should also increase a bit.  
 *          DONE
+*          Alternative: 8.4.1 Using Rectangular Bounding Boxes
 *               
 *    -    To make things more interesting for the players, add code so that the bouncing angle of the ball depends on where
 *          it hits a paddle. If the ball is close to the edge of the paddle, it should bounce off with a more extreme angle than when 
@@ -42,7 +44,7 @@ using System;
 *          
 *    -    If the ball reaches the left/right side of the screen and does not touch a paddle, then the ball should re-appear in the 
 *          center of the screen. It should start moving in a new random direction, at its relaxed starting speed. 
-*          TODO
+*          DONE
 */
 /* 3. Storing and showing the number of lives TODO
 *    -    Add code so that both players start with 3 lives. Whenever a player fails to bounce the ball back, that player should lose 
@@ -61,6 +63,22 @@ using System;
 *    -    When one of the players has no more lives left, the game should reach the "game over" state. In that state, the paddles and 
 *          balls can no longer move. There should then also be a message on the screen that says which player has won. Players 
 *          should now be able to start a new game by pressing the spacebar.
+*          
+*          
+*   TODO:
+*       Classes
+*           classes voor Pong niet belangrijk voor beoordeling, Tetris wel doen
+*           
+*           Welke variabelen en welke methods? wat moet het kunnen en wat is ervoor nodig
+*           Paddle: 
+*               var: Texture2D, positie, lives
+*               meth: draw, movement, bounds, reset
+*           Ball
+*               var: position, velocity/speed, Tex2D, direction/angle
+*               meth: draw, move, collision, bounds, reset
+*           Score
+*           GameState
+*   
 */
 
 namespace Pong
@@ -81,9 +99,10 @@ namespace Pong
         float leftPaddleVelocity, rightPaddleVelocity; // extra: use boost for speed-up
         int paddleWidth, paddleHeight;
 
-        // Window variables
+        // Other variables
         //Texture2D startBackground, gameBackground, endBackground;
         int windowWidth, windowHeight;
+        public static Random random = new Random();
 
         public Game1()
         {
@@ -98,20 +117,14 @@ namespace Pong
         {
             base.Initialize();
 
-            // Place ball in center of the screen (from center of the ball)
-            ballPosition = new Vector2(windowWidth / 2 - ballWidth / 2,
-                                       windowHeight / 2 - ballHeight / 2);
+            // Set paddles and ball to starting positions
+            ResetField();
 
-            // Place paddles centered in left and right edges
-            leftPaddlePosition = new Vector2(0, windowHeight / 2 - paddleHeight / 2);
-            rightPaddlePosition = new Vector2(windowWidth - paddleWidth,
-                                                                      windowHeight / 2 - paddleHeight / 2);
-
-            // Set speeds
-            ballVelocity = new Vector2(150, 150); // TODO: call System.Random
-            leftPaddleVelocity = 100f;
-            rightPaddleVelocity = 100f;
+            // TODO: Starting Screen
+            // Start();
+            // TODO: Player lives
         }
+
 
         protected override void LoadContent()
         {
@@ -136,32 +149,8 @@ namespace Pong
         protected override void Update(GameTime gameTime)
         {
             // Keyboard functionality
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
-            {
-                Exit();
-            }
-            // Paddle movement
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
-            {
-                leftPaddlePosition.Y -= 10;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.S))
-            {
-                leftPaddlePosition.Y += 10;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.Up))
-            {
-                rightPaddlePosition.Y -= 10;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.Down))
-            {
-                rightPaddlePosition.Y += 10;
-            }
+            keyboardInput();
 
-
-            // Ball moves with speed 150 toward bottom-right corner
-            // TODO: random direction
-            ballPosition += ballVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // Paddles can't "fall off the screen" (how to improve this copy-paste code?)
             // TOP
@@ -185,7 +174,83 @@ namespace Pong
                 rightPaddlePosition.Y = windowHeight - paddleHeight;
             }
 
-            // Ball boundaries
+            ballPosition += ballVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            ballMovement();
+
+            base.Update(gameTime);
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            // background color
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            // Draw sprites            
+            // Draws over previous content, so start with background
+            _spriteBatch.Begin();
+            //_spriteBatch.Draw(background, Vector2.Zero, Color.White);
+            _spriteBatch.Draw(leftPaddle, leftPaddlePosition, Color.CornflowerBlue);
+            _spriteBatch.Draw(rightPaddle, rightPaddlePosition, Color.CornflowerBlue);
+            _spriteBatch.Draw(ballSprite, ballPosition, Color.CornflowerBlue);
+            _spriteBatch.End();
+
+            base.Draw(gameTime);
+        }
+
+        public void ResetField()
+        {
+            // Place ball in center of the screen (from center of the ball)
+            ballPosition = new Vector2(windowWidth / 2 - ballWidth / 2,
+                                       windowHeight / 2 - ballHeight / 2);
+
+            // Place paddles centered in left and right edges
+            leftPaddlePosition = new Vector2(0, windowHeight / 2 - paddleHeight / 2);
+            rightPaddlePosition = new Vector2(windowWidth - paddleWidth,
+                                              windowHeight / 2 - paddleHeight / 2);
+
+            // Set speeds
+            float min = -250f;
+            float max = 250f;
+            // TODO: exclude middle of the range (dat hij niet recht omhoog/naar beneden gaat)
+            ballVelocity = new Vector2(random.NextSingle() * (max - min) + min,
+                                       random.NextSingle() * (max - min) + min);
+            leftPaddleVelocity = 100f;
+            rightPaddleVelocity = 100f;
+        }
+
+        public void keyboardInput()
+        {
+            // Start and Exit
+            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+            {
+                // Start();
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+            {
+                Exit();
+            }
+            // Paddle movement
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
+            {
+                leftPaddlePosition.Y -= 10;
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.S))
+            {
+                leftPaddlePosition.Y += 10;
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Up))
+            {
+                rightPaddlePosition.Y -= 10;
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Down))
+            {
+                rightPaddlePosition.Y += 10;
+            }
+        }
+
+        public void ballMovement()
+        {
+            // Ball boundaries and bounce-back
             // RIGHT
             if (ballPosition.X + ballSprite.Width > windowWidth)
             {
@@ -196,13 +261,14 @@ namespace Pong
                     // if yes--> return and speed up ball 
                     ballPosition.X = windowWidth - ballWidth - paddleWidth;
                     ballVelocity.X *= -1.2f;
+                    if (ballPosition.Y <=  )
                     // AND appropriately angled ballDirection
                     //ballDirection = ?;
                 }
                 // if no --> reset ball
                 else
                 {
-                    Initialize();
+                    ResetField();
                 }
             }
             // LEFT
@@ -221,7 +287,7 @@ namespace Pong
                 // if no --> reset ball
                 else
                 {
-                    Initialize();
+                    ResetField();
                 }
             }
             /* Bounce mechanics */
@@ -243,25 +309,15 @@ namespace Pong
                     ballVelocity.Y *= -1;
                 }
             }
-
-            base.Update(gameTime);
         }
 
-        protected override void Draw(GameTime gameTime)
-        {
-            // background color
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            // Draw sprites            
-            // Draws over previous content, so start with background
-            _spriteBatch.Begin();
-            //_spriteBatch.Draw(background, Vector2.Zero, Color.White);
-            _spriteBatch.Draw(leftPaddle, leftPaddlePosition, Color.CornflowerBlue);
-            _spriteBatch.Draw(rightPaddle, rightPaddlePosition, Color.CornflowerBlue);
-            _spriteBatch.Draw(ballSprite, ballPosition, Color.CornflowerBlue);
-            _spriteBatch.End();
-
-            base.Draw(gameTime);
-        }
     }
+
+    //class Player
+    //{
+    //    Texture2D leftPaddle, rightPaddle;
+    //    Vector2 leftPaddlePosition, rightPaddlePosition;
+    //    float leftPaddleVelocity, rightPaddleVelocity; // extra: use boost for speed-up
+    //    int paddleWidth, paddleHeight;
+    //}
 }
