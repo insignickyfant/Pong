@@ -90,8 +90,8 @@ namespace Pong
 
         // Sprite variables
         Texture2D ballSprite;
-        Vector2 ballPosition, ballVelocity;
-        float ballDirection; // or double? --> Draw wants float.. or..?
+        Vector2 ballPosition, ballDirection;
+        //float ballSpeed; // or double? --> Draw wants float.. or..?
         int ballWidth, ballHeight;
 
         Texture2D leftPaddle, rightPaddle;
@@ -174,7 +174,7 @@ namespace Pong
                 rightPaddlePosition.Y = windowHeight - paddleHeight;
             }
 
-            ballPosition += ballVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            ballPosition += ballDirection * (float)gameTime.ElapsedGameTime.TotalSeconds;
             ballMovement();
 
             base.Update(gameTime);
@@ -212,7 +212,7 @@ namespace Pong
             float min = -250f;
             float max = 250f;
             // TODO: exclude middle of the range (dat hij niet recht omhoog/naar beneden gaat)
-            ballVelocity = new Vector2(random.NextSingle() * (max - min) + min,
+            ballDirection = new Vector2(random.NextSingle() * (max - min) + min,
                                        random.NextSingle() * (max - min) + min);
             leftPaddleVelocity = 100f;
             rightPaddleVelocity = 100f;
@@ -254,16 +254,22 @@ namespace Pong
             // RIGHT
             if (ballPosition.X + ballSprite.Width > windowWidth)
             {
-                // TODO: add check if rightPaddle is touched and WHERE
+                // Check if and where rightPaddle is touched 
                 if (ballPosition.X + ballSprite.Width >= rightPaddlePosition.X - paddleWidth &&
                     ballPosition.Y >= rightPaddlePosition.Y && ballPosition.Y <= rightPaddlePosition.Y + paddleHeight)
                 {
-                    // if yes--> return and speed up ball 
+                    // if yes --> return and speed up ball 
                     ballPosition.X = windowWidth - ballWidth - paddleWidth;
-                    ballVelocity.X *= -1.2f;
-                    if (ballPosition.Y <=  )
+                    ballDirection.X *= -1.2f;
                     // AND appropriately angled ballDirection
-                    //ballDirection = ?;
+                    Vector2 rightMiddle = new Vector2(rightPaddlePosition.X, 
+                                                 rightPaddlePosition.Y + paddleHeight/2);
+                    float delta = ballPosition.Y - rightMiddle.Y;
+                    float d = paddleHeight/2;
+                    ballDirection = Vector2.Normalize(delta / d * -Vector2.UnitY + (1 - delta / d) * Vector2.UnitX);
+                    // hoeveel de .X overlap heeft, zo veel moet de bal teruggezet worden
+
+   
                 }
                 // if no --> reset ball
                 else
@@ -280,7 +286,7 @@ namespace Pong
                 {
                     // if yes--> return and speed up ball 
                     ballPosition.X = paddleWidth;
-                    ballVelocity.X *= -1.2f;
+                    ballDirection.X *= -1.2f;
                     // AND appropriately angled ballDirection
                     //ballDirection = ?;
                 }
@@ -295,18 +301,18 @@ namespace Pong
             if (ballPosition.Y < 0)
             {
                 ballPosition.Y = 0;
-                if (ballVelocity.Y <= 0)
+                if (ballDirection.Y <= 0)
                 {
-                    ballVelocity.Y *= -1;
+                    ballDirection.Y *= -1;
                 }
             }
             // BOTTOM
             else if (ballPosition.Y + ballHeight >= windowHeight)
             {
                 ballPosition.Y = windowHeight - ballHeight;
-                if (ballVelocity.Y >= 0)
+                if (ballDirection.Y >= 0)
                 {
-                    ballVelocity.Y *= -1;
+                    ballDirection.Y *= -1;
                 }
             }
         }
