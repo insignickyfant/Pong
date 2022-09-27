@@ -75,6 +75,7 @@ namespace Pong
 
         // Sprite variables
         // PongBall pongBall;
+        // Paddle leftPaddle, rightPaddle;
         Texture2D ballSprite;
         Vector2 ballPosition, ballDirection;
         //float ballSpeed; // or double? --> Draw wants float.. or..?
@@ -134,8 +135,8 @@ namespace Pong
 
             // Alternatively, when using classes:
             // pongBall = new PongBall(Content); to add as class
-            // leftPaddle = new Paddle(Content, left);            
-            // rightPaddle = new Paddle(Content, right);
+            // leftPaddle = new Paddle(Content, "left");            
+            // rightPaddle = new Paddle(Content, "right");
         }
 
         protected override void Update(GameTime gameTime)

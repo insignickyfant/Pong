@@ -1,12 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using System;
+using System.Reflection.Metadata;
 
-namespace Pong
+// to use, add left/rightPaddle = new Paddle(Content, left/right); in LoadContent
+
+class Paddle
 {
-    internal class Paddle
+    // Member Variables
+    Texture2D leftPaddle, rightPaddle;
+    Vector2 leftPaddlePosition, rightPaddlePosition;
+    float leftPaddleVelocity, rightPaddleVelocity; // extra: use boost for speed-up
+    int paddleWidth, paddleHeight;
+
+    // Paddle Constructor
+    public Paddle(ContentManager Content, String player)
     {
+        paddleHeight = leftPaddle.Height;
+        paddleWidth = leftPaddle.Width;
+
+        if (player == "left")
+        {
+            leftPaddle = Content.Load<Texture2D>("blauweSpeler");
+
+        }
+        else if (player == "right")
+        {
+            rightPaddle = Content.Load<Texture2D>("rodeSpeler");
+
+        }
     }
 }
