@@ -40,7 +40,7 @@ using System;
 *    -    To make things more interesting for the players, add code so that the bouncing angle of the ball depends on where
 *          it hits a paddle. If the ball is close to the edge of the paddle, it should bounce off with a more extreme angle than when 
 *          it hits the paddle in the middle. This allows players to apply some strategy, to make the game harder for their opponent.
-*          TODO
+*          TODO: bal gaat de paddle in
 *          
 *    -    If the ball reaches the left/right side of the screen and does not touch a paddle, then the ball should re-appear in the 
 *          center of the screen. It should start moving in a new random direction, at its relaxed starting speed. 
@@ -63,32 +63,18 @@ using System;
 *    -    When one of the players has no more lives left, the game should reach the "game over" state. In that state, the paddles and 
 *          balls can no longer move. There should then also be a message on the screen that says which player has won. Players 
 *          should now be able to start a new game by pressing the spacebar.
-*          
-*          
-*   TODO:
-*       Classes
-*           classes voor Pong niet belangrijk voor beoordeling, Tetris wel doen
-*           
-*           Welke variabelen en welke methods? wat moet het kunnen en wat is ervoor nodig
-*           Paddle: 
-*               var: Texture2D, positie, lives
-*               meth: draw, movement, bounds, reset
-*           Ball
-*               var: position, velocity/speed, Tex2D, direction/angle
-*               meth: draw, move, collision, bounds, reset
-*           Score
-*           GameState
 *   
 */
 
 namespace Pong
 {
-    public class Game1 : Game
+    public class Pong : Game
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
         // Sprite variables
+        // PongBall pongBall;
         Texture2D ballSprite;
         Vector2 ballPosition, ballDirection;
         //float ballSpeed; // or double? --> Draw wants float.. or..?
@@ -102,13 +88,14 @@ namespace Pong
         // Other variables
         //Texture2D startBackground, gameBackground, endBackground;
         int windowWidth, windowHeight;
-        public static Random random = new Random();  
+        public static Random random = new Random();
 
-        public Game1()
+
+        public Pong()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            IsMouseVisible = true;
+            IsMouseVisible = false;
             windowWidth = _graphics.PreferredBackBufferWidth;
             windowHeight = _graphics.PreferredBackBufferHeight;
         }
@@ -135,47 +122,27 @@ namespace Pong
             //gameBackground = Content.Load<Texture2D>(”background2”);
             //endBackground = Content.Load<Texture2D>(”background3”);
 
+
             ballSprite = Content.Load<Texture2D>("pongBall");
             ballHeight = ballSprite.Height;
             ballWidth = ballSprite.Width;
 
             leftPaddle = Content.Load<Texture2D>("blauweSpeler");
+            rightPaddle = Content.Load<Texture2D>("rodeSpeler");
             paddleHeight = leftPaddle.Height;
             paddleWidth = leftPaddle.Width;
 
-            rightPaddle = Content.Load<Texture2D>("rodeSpeler");
+            // Alternatively, when using classes:
+            // pongBall = new PongBall(Content); to add as class
+            // leftPaddle = new Paddle(Content, left);            
+            // rightPaddle = new Paddle(Content, right);
         }
 
         protected override void Update(GameTime gameTime)
         {
-            // Keyboard functionality
-            keyboardInput();
-
-
-            // Paddles can't "fall off the screen" (how to improve this copy-paste code?)
-            // TOP
-            if (leftPaddlePosition.Y < 0) 
-            {
-                leftPaddlePosition.Y = 0;
-            }
-            // BOTTOM
-            else if (leftPaddlePosition.Y > windowHeight - paddleHeight) 
-            {
-                leftPaddlePosition.Y = windowHeight - paddleHeight;
-            }
-            // TOP
-            if (rightPaddlePosition.Y < 0) 
-            {
-                rightPaddlePosition.Y = 0;
-            }
-            // BOTTOM
-            else if (rightPaddlePosition.Y > windowHeight - paddleHeight)
-            {
-                rightPaddlePosition.Y = windowHeight - paddleHeight;
-            }
-
-            ballPosition += ballDirection * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            ballMovement();
+            // Ball and Paddle movement
+            BallMovement(gameTime);
+            PaddleMovement();
 
             base.Update(gameTime);
         }
@@ -185,13 +152,12 @@ namespace Pong
             // background color
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // Draw sprites            
-            // Draws over previous content, so start with background
+            // Draw sprites (Draws over previous content, so start with background)
             _spriteBatch.Begin();
-                    //_spriteBatch.Draw(background, Vector2.Zero, Color.White);
-                    _spriteBatch.Draw(leftPaddle, leftPaddlePosition, Color.CornflowerBlue);
-                    _spriteBatch.Draw(rightPaddle, rightPaddlePosition, Color.CornflowerBlue);
-                    _spriteBatch.Draw(ballSprite, ballPosition, Color.CornflowerBlue);
+            //_spriteBatch.Draw(background, Vector2.Zero, Color.White);
+            _spriteBatch.Draw(leftPaddle, leftPaddlePosition, Color.CornflowerBlue);
+            _spriteBatch.Draw(rightPaddle, rightPaddlePosition, Color.CornflowerBlue);
+            _spriteBatch.Draw(ballSprite, ballPosition, Color.CornflowerBlue);
             _spriteBatch.End();
 
             base.Draw(gameTime);
@@ -200,57 +166,32 @@ namespace Pong
         public void ResetField()
         {
             // Place ball in center of the screen (from center of the ball)
-            ballPosition = new Vector2(windowWidth / 2 - ballWidth / 2,
-                                       windowHeight / 2 - ballHeight / 2);
+            ballPosition = new Vector2(windowWidth - ballWidth, windowHeight - ballHeight) / 2;
 
-            // Place paddles centered in left and right edges
-            leftPaddlePosition = new Vector2(0, windowHeight / 2 - paddleHeight / 2);
-            rightPaddlePosition = new Vector2(windowWidth - paddleWidth,
-                                              windowHeight / 2 - paddleHeight / 2);
-
-            // Set speeds
-            float min = -250f;
-            float max = 250f;
-            // TODO: exclude middle of the range (dat hij niet recht omhoog/naar beneden gaat)
-            ballDirection = new Vector2(random.NextSingle() * (max - min) + min,
-                                       random.NextSingle() * (max - min) + min);
+            // Place paddles centered in left and right edges at normal speed
+            leftPaddlePosition = new Vector2(0, (windowHeight - paddleHeight) / 2);
+            rightPaddlePosition = new Vector2(windowWidth - paddleWidth, (windowHeight - paddleHeight) / 2);
             leftPaddleVelocity = 100f;
             rightPaddleVelocity = 100f;
+
+
+            // TODO: exclude middle of the range (dat hij niet recht omhoog/naar beneden gaat)
+            // TODO: hij gaat soms nog steeds veels te langzaam, dus minimum snelheid nodig
+            // Random Direction
+            float min = -250f;
+            float max = 250f;
+            //float inclNegativeRange = (max - min) + min; --> waarom werkt dit niet??
+            ballDirection = new Vector2(random.NextSingle() * (max - min) + min,
+                                        random.NextSingle() * (max - min) + min);
+
         }
 
-        public void keyboardInput()
+
+        public void BallMovement(GameTime gameTime)
         {
-            // Start and Exit
-            if (Keyboard.GetState().IsKeyDown(Keys.Space))
-            {
-                // Start();
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
-            {
-                Exit();
-            }
-            // Paddle movement
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
-            {
-                leftPaddlePosition.Y -= 10;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.S))
-            {
-                leftPaddlePosition.Y += 10;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.Up))
-            {
-                rightPaddlePosition.Y -= 10;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.Down))
-            {
-                rightPaddlePosition.Y += 10;
-            }
-        }
+            ballPosition += ballDirection * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        public void ballMovement()
-        {            
-            // Ball boundaries and bounce-back
+            // Boundaries and Paddle Collision
             // RIGHT
             if (ballPosition.X + ballSprite.Width > windowWidth)
             {
@@ -262,14 +203,14 @@ namespace Pong
                     ballPosition.X = windowWidth - ballWidth - paddleWidth;
                     ballDirection.X *= -1.2f;
                     // AND appropriately angled ballDirection
-                    Vector2 rightMiddle = new Vector2(rightPaddlePosition.X, 
-                                                 rightPaddlePosition.Y + paddleHeight/2);
+                    Vector2 rightMiddle = new Vector2(rightPaddlePosition.X,
+                                                 rightPaddlePosition.Y + paddleHeight / 2);
                     float delta = ballPosition.Y - rightMiddle.Y;
-                    float d = paddleHeight/2;
+                    float d = paddleHeight / 2;
                     ballDirection = Vector2.Normalize(delta / d * -Vector2.UnitY + (1 - delta / d) * Vector2.UnitX);
                     // hoeveel de .X overlap heeft, zo veel moet de bal teruggezet worden
 
-   
+
                 }
                 // if no --> reset ball
                 else
@@ -296,7 +237,6 @@ namespace Pong
                     ResetField();
                 }
             }
-            /* Bounce mechanics */
             // TOP
             if (ballPosition.Y < 0)
             {
@@ -317,13 +257,63 @@ namespace Pong
             }
         }
 
-    }
+        private void PaddleMovement()
+        {
+            // Take user input from keyboard and moves corresponding paddle
+            KeyboardInput();
 
-    //class Player
-    //{
-    //    Texture2D leftPaddle, rightPaddle;
-    //    Vector2 leftPaddlePosition, rightPaddlePosition;
-    //    float leftPaddleVelocity, rightPaddleVelocity; // extra: use boost for speed-up
-    //    int paddleWidth, paddleHeight;
-    //}
+            // Paddle Boundaries
+            // TOP
+            if (leftPaddlePosition.Y < 0)
+            {
+                leftPaddlePosition.Y = 0;
+            }
+            // BOTTOM
+            else if (leftPaddlePosition.Y > windowHeight - paddleHeight)
+            {
+                leftPaddlePosition.Y = windowHeight - paddleHeight;
+            }
+            // TOP
+            if (rightPaddlePosition.Y < 0)
+            {
+                rightPaddlePosition.Y = 0;
+            }
+            // BOTTOM
+            else if (rightPaddlePosition.Y > windowHeight - paddleHeight)
+            {
+                rightPaddlePosition.Y = windowHeight - paddleHeight;
+            }
+        }
+
+        public void KeyboardInput()
+        {
+            // Start and Exit
+            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+            {
+                // Start();
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+            {
+                Exit();
+            }
+
+            // Paddle movement
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
+            {
+                leftPaddlePosition.Y -= 10;
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.S))
+            {
+                leftPaddlePosition.Y += 10;
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Up))
+            {
+                rightPaddlePosition.Y -= 10;
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Down))
+            {
+                rightPaddlePosition.Y += 10;
+            }
+        }
+    }
 }
