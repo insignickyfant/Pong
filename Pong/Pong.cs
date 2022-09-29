@@ -83,8 +83,7 @@ namespace Pong
 
         Texture2D leftPaddle, rightPaddle;
         Vector2 leftPaddlePosition, rightPaddlePosition;
-        float leftPaddleVelocity, rightPaddleVelocity; // extra: use boost for speed-up
-        int paddleWidth, paddleHeight;
+        int paddleWidth, paddleHeight, leftPaddleVelocity, rightPaddleVelocity;
 
         // Other variables
         //Texture2D startBackground, gameBackground, endBackground;
@@ -159,6 +158,9 @@ namespace Pong
             _spriteBatch.Draw(leftPaddle, leftPaddlePosition, Color.CornflowerBlue);
             _spriteBatch.Draw(rightPaddle, rightPaddlePosition, Color.CornflowerBlue);
             _spriteBatch.Draw(ballSprite, ballPosition, Color.CornflowerBlue);
+            //leftPaddle.Draw(gameTime, _spriteBatch);
+            //rightPaddle.Draw(gameTime, _spriteBatch); maybe just variable for both paddles?
+            //pongBall.Draw(gameTime, _spriteBatch);
             _spriteBatch.End();
 
             base.Draw(gameTime);
@@ -169,13 +171,6 @@ namespace Pong
             // Place ball in center of the screen (from center of the ball)
             ballPosition = new Vector2(windowWidth - ballWidth, windowHeight - ballHeight) / 2;
 
-            // Place paddles centered in left and right edges at normal speed
-            leftPaddlePosition = new Vector2(0, (windowHeight - paddleHeight) / 2);
-            rightPaddlePosition = new Vector2(windowWidth - paddleWidth, (windowHeight - paddleHeight) / 2);
-            leftPaddleVelocity = 100f;
-            rightPaddleVelocity = 100f;
-
-
             // TODO: exclude middle of the range (dat hij niet recht omhoog/naar beneden gaat)
             // TODO: hij gaat soms nog steeds veels te langzaam, dus minimum snelheid nodig
             // Random Direction
@@ -184,6 +179,19 @@ namespace Pong
             //float inclNegativeRange = (max - min) + min; --> waarom werkt dit niet??
             ballDirection = new Vector2(random.NextSingle() * (max - min) + min,
                                         random.NextSingle() * (max - min) + min);
+
+
+            // Place paddles centered in left and right edges at normal speed
+            leftPaddlePosition = new Vector2(0, (windowHeight - paddleHeight) / 2);
+            rightPaddlePosition = new Vector2(windowWidth - paddleWidth, (windowHeight - paddleHeight) / 2);
+            leftPaddleVelocity = 10;
+            rightPaddleVelocity = 10;
+            
+
+            // Alternatively, when using classes:
+            // leftPaddlePosition.Reset();
+            // righttPaddlePosition.Reset();
+            // pongBall.Reset();
 
         }
 
@@ -200,17 +208,17 @@ namespace Pong
                 if (ballPosition.X + ballSprite.Width >= rightPaddlePosition.X - paddleWidth &&
                     ballPosition.Y >= rightPaddlePosition.Y && ballPosition.Y <= rightPaddlePosition.Y + paddleHeight)
                 {
-                    // if yes --> return and speed up ball 
+                    // return and speed up ball 
                     ballPosition.X = windowWidth - ballWidth - paddleWidth;
                     ballDirection.X *= -1.2f;
+                    
                     // AND appropriately angled ballDirection
-                    Vector2 rightMiddle = new Vector2(rightPaddlePosition.X,
-                                                 rightPaddlePosition.Y + paddleHeight / 2);
-                    float delta = ballPosition.Y - rightMiddle.Y;
-                    float d = paddleHeight / 2;
-                    ballDirection = Vector2.Normalize(delta / d * -Vector2.UnitY + (1 - delta / d) * Vector2.UnitX);
-                    // hoeveel de .X overlap heeft, zo veel moet de bal teruggezet worden
+                    // AngledBounce("right");
+                    //Vector2 rightMiddle = new Vector2(rightPaddlePosition.X, rightPaddlePosition.Y + paddleHeight / 2);
+                    //float delta = ballPosition.Y - rightMiddle.Y;
+                    //float d = paddleHeight / 2;
 
+                    //ballDirection = Vector2.Normalize(delta / d * -Vector2.UnitY + (1 - delta / d) * Vector2.UnitX);
 
                 }
                 // if no --> reset ball
@@ -261,7 +269,7 @@ namespace Pong
         private void PaddleMovement()
         {
             // Take user input from keyboard and moves corresponding paddle
-            KeyboardInput();
+            KeyboardInput(leftPaddleVelocity, rightPaddleVelocity);
 
             // Paddle Boundaries
             // TOP
@@ -286,7 +294,7 @@ namespace Pong
             }
         }
 
-        public void KeyboardInput()
+        public void KeyboardInput(int lPV, int rPV)
         {
             // Start and Exit
             if (Keyboard.GetState().IsKeyDown(Keys.Space))
@@ -301,19 +309,19 @@ namespace Pong
             // Paddle movement
             if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
-                leftPaddlePosition.Y -= 10;
+                leftPaddlePosition.Y -= lPV;
             }
             if (Keyboard.GetState().IsKeyDown(Keys.S))
             {
-                leftPaddlePosition.Y += 10;
+                leftPaddlePosition.Y += lPV;
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Up))
             {
-                rightPaddlePosition.Y -= 10;
+                rightPaddlePosition.Y -= rPV;
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Down))
             {
-                rightPaddlePosition.Y += 10;
+                rightPaddlePosition.Y += rPV;
             }
         }
     }
