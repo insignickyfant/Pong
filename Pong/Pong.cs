@@ -66,263 +66,298 @@ using System;
 *   
 */
 
-namespace Pong
+public class Pong : Game
 {
-    public class Pong : Game
+    GraphicsDeviceManager graphics;
+    SpriteBatch spriteBatch;
+    static Vector2 screenSize;
+    static Random random = new Random();
+
+    // Sprite variables
+    // PongBall pongBall;
+    // Paddle leftPaddle, rightPaddle;
+    Texture2D ballSprite;
+    Vector2 ballPosition, ballVelocity, ballOrigin;
+    //float ballSpeed; // or double? --> Draw wants float.. or..?
+    //int ballWidth, ballSprite.Height;
+
+    Texture2D leftPaddle, rightPaddle;
+    Vector2 leftPaddlePosition, rightPaddlePosition;
+    int paddleWidth, paddleHeight, leftPaddleVelocity, rightPaddleVelocity;
+
+    // Other variables
+    //Texture2D startBackground, gameBackground, endBackground;
+        
+  
+
+    public Pong()
     {
-        private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
-
-        // Sprite variables
-        // PongBall pongBall;
-        // Paddle leftPaddle, rightPaddle;
-        Texture2D ballSprite;
-        Vector2 ballPosition, ballDirection;
-        //float ballSpeed; // or double? --> Draw wants float.. or..?
-        int ballWidth, ballHeight;
-
-        Texture2D leftPaddle, rightPaddle;
-        Vector2 leftPaddlePosition, rightPaddlePosition;
-        int paddleWidth, paddleHeight, leftPaddleVelocity, rightPaddleVelocity;
-
-        // Other variables
-        //Texture2D startBackground, gameBackground, endBackground;
-        int windowWidth, windowHeight;
-        public static Random random = new Random();
+        graphics = new GraphicsDeviceManager(this);
+        Content.RootDirectory = "Content";
+        IsMouseVisible = false;
+        random = new Random();
+    }
 
 
-        public Pong()
-        {
-            _graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
-            IsMouseVisible = false;
-            windowWidth = _graphics.PreferredBackBufferWidth;
-            windowHeight = _graphics.PreferredBackBufferHeight;
-        }
+    protected override void Initialize()
+    {
+        base.Initialize();
 
-        protected override void Initialize()
-        {
-            base.Initialize();
+        // Set paddles and ball to starting positions
+        ResetField();
 
-            // Set paddles and ball to starting positions
-            ResetField();
-
-            // TODO: Starting Screen
-            // Start();
-            // TODO: Player lives
-        }
+        // TODO: Starting Screen
+        // Start();
+        // TODO: Player lives
+    }
 
 
-        protected override void LoadContent()
-        {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            // Game sprites and helper variables
-            //startBackground = Content.Load<Texture2D>(”background1”);
-            //gameBackground = Content.Load<Texture2D>(”background2”);
-            //endBackground = Content.Load<Texture2D>(”background3”);
-
-
-            ballSprite = Content.Load<Texture2D>("pongBall");
-            ballHeight = ballSprite.Height;
-            ballWidth = ballSprite.Width;
-
-            leftPaddle = Content.Load<Texture2D>("blauweSpeler");
-            rightPaddle = Content.Load<Texture2D>("rodeSpeler");
-            paddleHeight = leftPaddle.Height;
-            paddleWidth = leftPaddle.Width;
-
-            // Alternatively, when using classes:
-            // pongBall = new PongBall(Content); to add as class
-            // leftPaddle = new Paddle(Content, "left");            
-            // rightPaddle = new Paddle(Content, "right");
-        }
-
-        protected override void Update(GameTime gameTime)
-        {
-            // Ball and Paddle movement
-            BallMovement(gameTime);
-            PaddleMovement();
-
-            base.Update(gameTime);
-        }
-
-        protected override void Draw(GameTime gameTime)
-        {
-            // background color
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            // Draw sprites (Draws over previous content, so start with background)
-            _spriteBatch.Begin();
-            //_spriteBatch.Draw(background, Vector2.Zero, Color.White);
-            _spriteBatch.Draw(leftPaddle, leftPaddlePosition, Color.CornflowerBlue);
-            _spriteBatch.Draw(rightPaddle, rightPaddlePosition, Color.CornflowerBlue);
-            _spriteBatch.Draw(ballSprite, ballPosition, Color.CornflowerBlue);
-            //leftPaddle.Draw(gameTime, _spriteBatch);
-            //rightPaddle.Draw(gameTime, _spriteBatch); maybe just variable for both paddles?
-            //pongBall.Draw(gameTime, _spriteBatch);
-            _spriteBatch.End();
-
-            base.Draw(gameTime);
-        }
-
-        public void ResetField()
-        {
-            // Place ball in center of the screen (from center of the ball)
-            ballPosition = new Vector2(windowWidth - ballWidth, windowHeight - ballHeight) / 2;
-
-            // TODO: exclude middle of the range (dat hij niet recht omhoog/naar beneden gaat)
-            // TODO: hij gaat soms nog steeds veels te langzaam, dus minimum snelheid nodig
-            // Random Direction
-            float min = -250f;
-            float max = 250f;
-            //float inclNegativeRange = (max - min) + min; --> waarom werkt dit niet??
-            ballDirection = new Vector2(random.NextSingle() * (max - min) + min,
-                                        random.NextSingle() * (max - min) + min);
+    protected override void LoadContent()
+    {
+        spriteBatch = new SpriteBatch(GraphicsDevice);
+        screenSize = new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+        // Game sprites and helper variables
+        //startBackground = Content.Load<Texture2D>(”background1”);
+        //gameBackground = Content.Load<Texture2D>(”background2”);
+        //endBackground = Content.Load<Texture2D>(”background3”);
 
 
-            // Place paddles centered in left and right edges at normal speed
-            leftPaddlePosition = new Vector2(0, (windowHeight - paddleHeight) / 2);
-            rightPaddlePosition = new Vector2(windowWidth - paddleWidth, (windowHeight - paddleHeight) / 2);
-            leftPaddleVelocity = 10;
-            rightPaddleVelocity = 10;
+        ballSprite = Content.Load<Texture2D>("pongBall");
+        ballOrigin = new Vector2(ballSprite.Height, ballSprite.Width) / 2;
+
+        leftPaddle = Content.Load<Texture2D>("blauweSpeler");
+        rightPaddle = Content.Load<Texture2D>("rodeSpeler");
+        paddleHeight = leftPaddle.Height;
+        paddleWidth = leftPaddle.Width;
+
+        // Alternatively, when using classes:
+        // pongBall = new PongBall(Content); to add as class
+        // leftPaddle = new Paddle(Content, "left");            
+        // rightPaddle = new Paddle(Content, "right");
+    }
+
+    protected override void Update(GameTime gameTime)
+    {
+        // Ball and Paddle movement
+        BallMovement(gameTime);
+        PaddleMovement();
+
+        base.Update(gameTime);
+    }
+
+    protected override void Draw(GameTime gameTime)
+    {
+        // background color
+        GraphicsDevice.Clear(Color.CornflowerBlue);
+
+        // Draw sprites (Draws over previous content, so start with background)
+        spriteBatch.Begin();
+        //_spriteBatch.Draw(background, Vector2.Zero, Color.White);
+        spriteBatch.Draw(leftPaddle, leftPaddlePosition, Color.CornflowerBlue);
+        spriteBatch.Draw(rightPaddle, rightPaddlePosition, Color.CornflowerBlue);
+        spriteBatch.Draw(ballSprite, ballPosition, Color.CornflowerBlue);
+        //leftPaddle.Draw(gameTime, _spriteBatch);
+        //rightPaddle.Draw(gameTime, _spriteBatch); maybe just variable for both paddles?
+        //pongBall.Draw(gameTime, _spriteBatch);
+        spriteBatch.End();
+
+        base.Draw(gameTime);
+    }
+
+    public void ResetField()
+    {
+        // Place ball in center of the screen (from center of the ball)
+        ballPosition = screenSize / 2 - ballOrigin;
+        RandomDirection();
+
+        // Place paddles centered in left and right edges at normal speed
+        leftPaddlePosition = new Vector2(0, (ScreenSize.Y - paddleHeight) / 2);
+        rightPaddlePosition = new Vector2(ScreenSize.X - paddleWidth, (ScreenSize.Y - paddleHeight) / 2);
+        leftPaddleVelocity = 10;
+        rightPaddleVelocity = 10;
             
 
-            // Alternatively, when using classes:
-            // leftPaddlePosition.Reset();
-            // righttPaddlePosition.Reset();
-            // pongBall.Reset();
+        // Alternatively, when using classes:
+        // leftPaddlePosition.Reset();
+        // righttPaddlePosition.Reset();
+        // pongBall.Reset();
 
-        }
+    }
 
 
-        public void BallMovement(GameTime gameTime)
+    public void BallMovement(GameTime gameTime)
+    {
+        ballPosition += ballVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        // Boundaries and Paddle Collision
+        // RIGHT
+        if (ballPosition.X + ballSprite.Width > ScreenSize.X)
         {
-            ballPosition += ballDirection * (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            // Boundaries and Paddle Collision
-            // RIGHT
-            if (ballPosition.X + ballSprite.Width > windowWidth)
+            // Check if and where rightPaddle is touched 
+            if (ballPosition.X + ballSprite.Width >= rightPaddlePosition.X - paddleWidth &&
+                ballPosition.Y >= rightPaddlePosition.Y && ballPosition.Y <= rightPaddlePosition.Y + paddleHeight)
             {
-                // Check if and where rightPaddle is touched 
-                if (ballPosition.X + ballSprite.Width >= rightPaddlePosition.X - paddleWidth &&
-                    ballPosition.Y >= rightPaddlePosition.Y && ballPosition.Y <= rightPaddlePosition.Y + paddleHeight)
-                {
-                    // return and speed up ball 
-                    ballPosition.X = windowWidth - ballWidth - paddleWidth;
-                    ballDirection.X *= -1.2f;
+                // return and speed up ball 
+                ballPosition.X = ScreenSize.X - ballSprite.Width - paddleWidth;
+                ballVelocity.X *= -1.2f;
                     
-                    // AND appropriately angled ballDirection
-                    // AngledBounce("right");
-                    //Vector2 rightMiddle = new Vector2(rightPaddlePosition.X, rightPaddlePosition.Y + paddleHeight / 2);
-                    //float delta = ballPosition.Y - rightMiddle.Y;
-                    //float d = paddleHeight / 2;
+                // AND appropriately angled ballDirection
+                // AngledBounce("right");
+                //Vector2 rightMiddle = new Vector2(rightPaddlePosition.X, rightPaddlePosition.Y + paddleHeight / 2);
+                //float delta = ballPosition.Y - rightMiddle.Y;
+                //float d = paddleHeight / 2;
 
-                    //ballDirection = Vector2.Normalize(delta / d * -Vector2.UnitY + (1 - delta / d) * Vector2.UnitX);
+                //ballDirection = Vector2.Normalize(delta / d * -Vector2.UnitY + (1 - delta / d) * Vector2.UnitX);
 
-                }
-                // if no --> reset ball
-                else
-                {
-                    ResetField();
-                }
             }
-            // LEFT
-            else if (ballPosition.X < 0)
+            // if no --> reset ball
+            else
             {
-                // TODO: add check if leftPaddle is touched and WHERE
-                if (ballPosition.X <= paddleWidth &&
-                    ballPosition.Y >= leftPaddlePosition.Y && ballPosition.Y <= leftPaddlePosition.Y + paddleHeight)
-                {
-                    // if yes--> return and speed up ball 
-                    ballPosition.X = paddleWidth;
-                    ballDirection.X *= -1.2f;
-                    // AND appropriately angled ballDirection
-                    //ballDirection = ?;
-                }
-                // if no --> reset ball
-                else
-                {
-                    ResetField();
-                }
-            }
-            // TOP
-            if (ballPosition.Y < 0)
-            {
-                ballPosition.Y = 0;
-                if (ballDirection.Y <= 0)
-                {
-                    ballDirection.Y *= -1;
-                }
-            }
-            // BOTTOM
-            else if (ballPosition.Y + ballHeight >= windowHeight)
-            {
-                ballPosition.Y = windowHeight - ballHeight;
-                if (ballDirection.Y >= 0)
-                {
-                    ballDirection.Y *= -1;
-                }
+                ResetField();
             }
         }
-
-        private void PaddleMovement()
+        // LEFT
+        else if (ballPosition.X < 0)
         {
-            // Take user input from keyboard and moves corresponding paddle
-            KeyboardInput(leftPaddleVelocity, rightPaddleVelocity);
-
-            // Paddle Boundaries
-            // TOP
-            if (leftPaddlePosition.Y < 0)
+            // TODO: add check if leftPaddle is touched and WHERE
+            if (ballPosition.X <= paddleWidth &&
+                ballPosition.Y >= leftPaddlePosition.Y && ballPosition.Y <= leftPaddlePosition.Y + paddleHeight)
             {
-                leftPaddlePosition.Y = 0;
+                // if yes--> return and speed up ball 
+                ballPosition.X = paddleWidth;
+                ballVelocity.X *= -1.2f;
+                // AND appropriately angled ballDirection
+                //ballDirection = ?;
             }
-            // BOTTOM
-            else if (leftPaddlePosition.Y > windowHeight - paddleHeight)
+            // if no --> reset ball
+            else
             {
-                leftPaddlePosition.Y = windowHeight - paddleHeight;
-            }
-            // TOP
-            if (rightPaddlePosition.Y < 0)
-            {
-                rightPaddlePosition.Y = 0;
-            }
-            // BOTTOM
-            else if (rightPaddlePosition.Y > windowHeight - paddleHeight)
-            {
-                rightPaddlePosition.Y = windowHeight - paddleHeight;
+                ResetField();
             }
         }
-
-        public void KeyboardInput(int lPV, int rPV)
+        // TOP
+        if (ballPosition.Y < 0)
         {
-            // Start and Exit
-            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+            ballPosition.Y = 0;
+            if (ballVelocity.Y <= 0)
             {
-                // Start();
+                ballVelocity.Y *= -1;
             }
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+        }
+        // BOTTOM
+        else if (ballPosition.Y + ballSprite.Height >= ScreenSize.Y)
+        {
+            ballPosition.Y = ScreenSize.Y - ballSprite.Height;
+            if (ballVelocity.Y >= 0)
             {
-                Exit();
-            }
-
-            // Paddle movement
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
-            {
-                leftPaddlePosition.Y -= lPV;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.S))
-            {
-                leftPaddlePosition.Y += lPV;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.Up))
-            {
-                rightPaddlePosition.Y -= rPV;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.Down))
-            {
-                rightPaddlePosition.Y += rPV;
+                ballVelocity.Y *= -1;
             }
         }
     }
+    private void RandomDirection()
+    {
+        // ballVelocity.X moet ongeveer 2x zo groot/klein zijn als velocity Y, zodat hij niet recht omhoog/naar beneden gaat.
+        ballVelocity = new Vector2(random.Next(-50, 50)*0.1f, random.Next(-100, 100));
+        
+        // Vraag: kan dit nog korter?
+        // Add minimum speed
+        switch (ballVelocity.X)
+        {
+            case < 0:
+                ballVelocity.X -= 250;
+                break;
+            default:
+                ballVelocity.X += 250;
+                break;
+        }
+        //switch (ballVelocity.Y)
+        //{
+        //    case < 0:
+        //        ballVelocity.Y -= 100;
+        //        break;
+        //    default:
+        //        ballVelocity.Y += 100;
+        //        break;
+        //}
+        
+        // Alternatief
+        //if (ballDirection.X < 0)
+        //{
+        //    ballDirection.X -= 50;
+        //}
+        //else ballDirection.X += 50;
+        //
+        // ... etc ...
+
+
+        // Vraag:
+        //int min = -50;
+        //int max = 50;
+        ////float inclNegativeRange = (max - min) + min; --> waarom werkt dit niet??
+        //ballDirection = new Vector2(random.NextSingle() * (max - min) + min,
+        //                            random.NextSingle() * (max - min) + min);
+
+    }
+    private void PaddleMovement()
+    {
+        // Take user input from keyboard and moves corresponding paddle
+        KeyboardInput(leftPaddleVelocity, rightPaddleVelocity);
+
+        // Paddle Boundaries
+        // TOP
+        if (leftPaddlePosition.Y < 0)
+        {
+            leftPaddlePosition.Y = 0;
+        }
+        // BOTTOM
+        else if (leftPaddlePosition.Y > ScreenSize.Y - paddleHeight)
+        {
+            leftPaddlePosition.Y = ScreenSize.Y - paddleHeight;
+        }
+        // TOP
+        if (rightPaddlePosition.Y < 0)
+        {
+            rightPaddlePosition.Y = 0;
+        }
+        // BOTTOM
+        else if (rightPaddlePosition.Y > ScreenSize.Y - paddleHeight)
+        {
+            rightPaddlePosition.Y = ScreenSize.Y - paddleHeight;
+        }
+    }
+
+    public void KeyboardInput(int lPV, int rPV)
+    {
+        // Start and Exit
+        if (Keyboard.GetState().IsKeyDown(Keys.Space))
+        {
+            // Start();
+        }
+        if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+        {
+            Exit();
+        }
+
+        // Paddle movement
+        if (Keyboard.GetState().IsKeyDown(Keys.W))
+        {
+            leftPaddlePosition.Y -= lPV;
+        }
+        if (Keyboard.GetState().IsKeyDown(Keys.S))
+        {
+            leftPaddlePosition.Y += lPV;
+        }
+        if (Keyboard.GetState().IsKeyDown(Keys.Up))
+        {
+            rightPaddlePosition.Y -= rPV;
+        }
+        if (Keyboard.GetState().IsKeyDown(Keys.Down))
+        {
+            rightPaddlePosition.Y += rPV;
+        }
+    }
+
+    // Properties
+    public static Vector2 ScreenSize { get { return screenSize; } }
+    public static Random Random { get { return random; } }
 }

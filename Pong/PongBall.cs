@@ -11,22 +11,17 @@ using SpriteBatch = Microsoft.Xna.Framework.Graphics.SpriteBatch;
 class PongBall
 {
     // Member Variables
-    Texture2D ballSprite;
-    Vector2 ballPosition, ballDirection, ballOrigin;
-    //float ballSpeed; toevoegen aan alternatieve Vector2?
-    int ballWidth, ballHeight;
+    Texture2D sprite;
+    Vector2 position, ballDirection, ballOrigin;
+    //float speed; toevoegen aan alternatieve Vector2?
 
     public static Random random = new Random();
 
     // PongBall Constructor that initialises all related variables
     public PongBall(ContentManager Content)
     {
-        ballSprite = Content.Load<Texture2D>("pongBall");
-
-        ballHeight = ballSprite.Height;
-        ballWidth = ballSprite.Width;
-        ballOrigin = new Vector2(ballHeight, ballWidth) / 2;
-        ballPosition = new Vector2(480, 300) / 2 - ballOrigin; // get windowwidth and height from graphics
+        sprite = Content.Load<Texture2D>("pongBall");
+        ballOrigin = new Vector2(sprite.Height, sprite.Width) / 2;
 
         // Minimum speed
         float min = -250f;
@@ -34,18 +29,20 @@ class PongBall
         // TODO: exclude middle of the range (dat hij niet recht omhoog/naar beneden gaat)
         ballDirection = new Vector2(random.NextSingle() * (max - min) + min,
                                    random.NextSingle() * (max - min) + min);
+
     }
 
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(ballSprite, ballPosition, Color.CornflowerBlue);
+        spriteBatch.Draw(sprite, position, Color.CornflowerBlue);
 
     }
 
     public void Reset()
     {
         // Place ball in center of the screen (from center of the ball)
-        ballPosition = new Vector2(480 - ballWidth, 300 - ballHeight) / 2;
+        position = Pong.ScreenSize / 2 - ballOrigin; 
+        
 
         // TODO: exclude middle of the range (dat hij niet recht omhoog/naar beneden gaat)
         // TODO: hij gaat soms nog steeds veels te langzaam, dus minimum snelheid nodig
